@@ -6,11 +6,25 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import:stages": "tsx scripts/import/import-stages.ts",
+    "import:referees": "tsx scripts/import/import-referees.ts",
+    "import:venues": "tsx scripts/import/import-venues.ts",
+    "import:teams": "tsx scripts/import/import-teams.ts",
+    "import:players": "tsx scripts/import/import-players.ts",
+    "import:player-stats": "tsx scripts/import/import-player-stats.ts",
+    "import:matches": "tsx scripts/import/import-matches.ts",
+    "import:match-details": "tsx scripts/import/import-match-details.ts",
+    "import:match-predictions": "tsx scripts/import/import-match-predictions.ts",
+    "import:events": "tsx scripts/import/import-events.ts",
+    "import:lineups": "tsx scripts/import/import-lineups.ts",
+    "import:team-stats": "tsx scripts/import/import-team-stats.ts",
+    "seed": "tsx scripts/import/seed.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.12",
     "@hookform/resolvers": "^5.4.0",
+    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@upstash/redis": "^1.38.0",
     "ai": "^7.0.22",
@@ -18,6 +32,7 @@
     "better-auth": "^1.6.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "csvtojson": "^2.0.14",
     "d3": "^7.9.0",
     "date-fns": "^4.4.0",
     "echarts": "^6.1.0",
@@ -26,6 +41,7 @@
     "inngest": "^4.12.1",
     "lucide-react": "^1.24.0",
     "next": "16.2.10",
+    "pg": "^8.22.0",
     "prisma": "^7.8.0",
     "radix-ui": "^1.6.2",
     "react": "19.2.4",
@@ -39,12 +55,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/csvtojson": "^1.1.5",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }

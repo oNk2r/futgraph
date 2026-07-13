@@ -1,13 +1,309 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model TournamentStage {
+  id         Int     @id @map("stage_id")
+  name       String  @map("stage_name")
+  isKnockout Boolean @map("is_knockout")
+  matches    Match[]
+
+  @@map("tournament_stages")
+}
+
+model Venue {
+  id              Int     @id @map("venue_id")
+  stadiumName     String  @map("stadium_name")
+  city            String
+  country         String
+  capacity        Int
+  latitude        Float
+  longitude       Float
+  elevationMeters Float   @map("elevation_meters")
+  matches         Match[]
+
+  @@map("venues")
+}
+
+model Referee {
+  id               Int     @id @map("referee_id")
+  name             String
+  country          String
+  avgCardsPerGame  Float   @map("avg_cards_per_game")
+  matches          Match[]
+
+  @@map("referees")
+}
+
+model Team {
+  id                       Int              @id @map("team_id")
+  name                     String           @map("team_name")
+  fifaCode                 String           @unique @map("fifa_code")
+  groupLetter              String           @map("group_letter")
+  confederation            String
+  fifaRankingPreTournament Int              @map("fifa_ranking_pre_tournament")
+  eloRating                Int              @map("elo_rating")
+  managerName              String           @map("manager_name")
+  players                  Player[]
+  homeMatches              Match[]          @relation("HomeMatches")
+  awayMatches              Match[]          @relation("AwayMatches")
+  events                   MatchEvent[]
+  lineups                  MatchLineup[]
+  teamStats                MatchTeamStats[]
+  playerStats              PlayerStats[]
+
+  @@map("teams")
+}
+
+model Player {
+  id             Int          @id @map("player_id")
+  teamId         Int          @map("team_id")
+  team           Team         @relation(fields: [teamId], references: [id])
+  name           String       @map("player_name")
+  position       String
+  clubTeam       String       @map("club_team")
+  marketValueEur Int          @map("market_value_eur")
+  caps           Int
+  dateOfBirth    DateTime     @map("date_of_birth")
+  heightCm       Int          @map("height_cm")
+  goals          Int
+  playerStats    PlayerStats?
+  motmMatches    Match[]      @relation("MotmMatches")
+  events         MatchEvent[]
+  lineups        MatchLineup[]
+
+  @@index([teamId])
+  @@map("players")
+}
+
+model PlayerStats {
+  playerId       Int      @id @map("player_id")
+  player         Player   @relation(fields: [playerId], references: [id])
+  teamId         Int      @map("team_id")
+  team           Team     @relation(fields: [teamId], references: [id])
+  position       String
+  matchesPlayed  Int      @map("matches_played")
+  matchesStarted Int      @map("matches_started")
+  minutesPlayed  Int      @map("minutes_played")
+  goals          Int
+  assists        Int
+  shots          Int?
+  shotsOnTarget  Int?     @map("shots_on_target")
+  yellowCards    Int      @map("yellow_cards")
+  redCards       Int      @map("red_cards")
+  penaltyGoals   Int      @map("penalty_goals")
+  ownGoals       Int      @map("own_goals")
+  cleanSheets    Int?     @map("clean_sheets")
+  saves          Int?
+  goalsConceded  Int?     @map("goals_conceded")
+  averageRating  Float?   @map("average_rating")
+  dataSource     String?  @map("data_source")
+  lastVerified   DateTime @map("last_verified")
+
+  @@index([teamId])
+  @@map("player_stats")
+}
+
+model Match {
+  id                 Int                     @id @map("match_id")
+  date               DateTime
+  kickoffTimeUtc     String                  @map("kickoff_time_utc")
+  stageId            Int                     @map("stage_id")
+  stage              TournamentStage         @relation(fields: [stageId], references: [id])
+  venueId            Int                     @map("venue_id")
+  venue              Venue                   @relation(fields: [venueId], references: [id])
+  homeTeamId         Int?                    @map("home_team_id")
+  homeTeam           Team?                   @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  awayTeamId         Int?                    @map("away_team_id")
+  awayTeam           Team?                   @relation("AwayMatches", fields: [awayTeamId], references: [id])
+  homeScore          Int?                    @map("home_score")
+  awayScore          Int?                    @map("away_score")
+  homePenaltyScore   Int?                    @map("home_penalty_score")
+  awayPenaltyScore   Int?                    @map("away_penalty_score")
+  status             String
+  resultType         String?                 @map("result_type")
+  homeXg             Float?                  @map("home_xg")
+  awayXg             Float?                  @map("away_xg")
+  refereeId          Int                     @map("referee_id")
+  referee            Referee                 @relation(fields: [refereeId], references: [id])
+  playerOfTheMatchId Int?                    @map("player_of_the_match_id")
+  playerOfTheMatch   Player?                 @relation("MotmMatches", fields: [playerOfTheMatchId], references: [id])
+  detail             MatchDetail?
+  predictionFeature  MatchPredictionFeature?
+  events             MatchEvent[]
+  lineups            MatchLineup[]
+  teamStats          MatchTeamStats[]
+
+  @@index([stageId])
+  @@index([venueId])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+  @@index([refereeId])
+  @@map("matches")
+}
+
+model MatchDetail {
+  matchId             Int      @id @map("match_id")
+  match               Match    @relation(fields: [matchId], references: [id])
+  date                DateTime
+  kickoffTimeUtc      String   @map("kickoff_time_utc")
+  stageName           String   @map("stage_name")
+  stadiumName         String   @map("stadium_name")
+  city                String
+  country             String
+  homeTeamName        String?  @map("home_team_name")
+  homeFifaCode        String?  @map("home_fifa_code")
+  awayTeamName        String?  @map("away_team_name")
+  awayFifaCode        String?  @map("away_fifa_code")
+  homeScore           Int?     @map("home_score")
+  awayScore           Int?     @map("away_score")
+  homePenaltyScore    Int?     @map("home_penalty_score")
+  awayPenaltyScore    Int?     @map("away_penalty_score")
+  status              String
+  resultType          String?  @map("result_type")
+  homeXg              Float?   @map("home_xg")
+  awayXg              Float?   @map("away_xg")
+  homeGoalkeeper      String?  @map("home_goalkeeper")
+  awayGoalkeeper      String?  @map("away_goalkeeper")
+  playerOfTheMatchName String? @map("player_of_the_match_name")
+  refereeName         String   @map("referee_name")
+
+  @@map("match_details")
+}
+
+model MatchPredictionFeature {
+  matchId                  Int      @id @map("match_id")
+  match                    Match    @relation(fields: [matchId], references: [id])
+  date                     DateTime
+  kickoffTimeUtc           String   @map("kickoff_time_utc")
+  stageId                  Int      @map("stage_id")
+  isKnockout               Boolean  @map("is_knockout")
+  homeTeamId               Int      @map("home_team_id")
+  homeTeamName             String   @map("home_team_name")
+  homeFifaCode             String   @map("home_fifa_code")
+  homeConfederation        String   @map("home_confederation")
+  awayTeamId               Int      @map("away_team_id")
+  awayTeamName             String   @map("away_team_name")
+  awayFifaCode             String   @map("away_fifa_code")
+  awayConfederation        String   @map("away_confederation")
+  venueId                  Int      @map("venue_id")
+  stadiumName              String   @map("stadium_name")
+  venueCity                String   @map("venue_city")
+  venueCountry             String   @map("venue_country")
+  venueCapacity            Int      @map("venue_capacity")
+  venueElevationMeters     Float    @map("venue_elevation_meters")
+  refereeId                Int      @map("referee_id")
+  refereeName              String   @map("referee_name")
+  refereeAvgCards          Float    @map("referee_avg_cards")
+  homeFifaRank             Int      @map("home_fifa_rank")
+  awayFifaRank             Int      @map("away_fifa_rank")
+  homeElo                  Float    @map("home_elo")
+  awayElo                  Float    @map("away_elo")
+  homeIsHost               Boolean  @map("home_is_host")
+  awayIsHost               Boolean  @map("away_is_host")
+  homeSquadAvgAge          Float    @map("home_squad_avg_age")
+  awaySquadAvgAge          Float    @map("away_squad_avg_age")
+  homeSquadTotalCaps       Int      @map("home_squad_total_caps")
+  awaySquadTotalCaps       Int      @map("away_squad_total_caps")
+  homeSquadTotalValueEur   Float    @map("home_squad_total_value_eur")
+  awaySquadTotalValueEur   Float    @map("away_squad_total_value_eur")
+  homeSquadAvgValueEur     Float    @map("home_squad_avg_value_eur")
+  awaySquadAvgValueEur     Float    @map("away_squad_avg_value_eur")
+  homeRestDays             Float    @map("home_rest_days")
+  awayRestDays             Float    @map("away_rest_days")
+  homePrevAvgGoalsScored   Float    @map("home_prev_avg_goals_scored")
+  homePrevAvgGoalsConceded Float    @map("home_prev_avg_goals_conceded")
+  awayPrevAvgGoalsScored   Float    @map("away_prev_avg_goals_scored")
+  awayPrevAvgGoalsConceded Float    @map("away_prev_avg_goals_conceded")
+  homePrevAvgPossession    Float    @map("home_prev_avg_possession")
+  awayPrevAvgPossession    Float    @map("away_prev_avg_possession")
+  homePrevAvgShots         Float    @map("home_prev_avg_shots")
+  awayPrevAvgShots         Float    @map("away_prev_avg_shots")
+  homePrevAvgShotsOnTarget Float    @map("home_prev_avg_shots_on_target")
+  awayPrevAvgShotsOnTarget Float    @map("away_prev_avg_shots_on_target")
+  homePrevAvgSaves         Float    @map("home_prev_avg_saves")
+  awayPrevAvgSaves         Float    @map("away_prev_avg_saves")
+  homePrevAvgCorners       Float    @map("home_prev_avg_corners")
+  awayPrevAvgCorners       Float    @map("away_prev_avg_corners")
+  homePrevAvgFouls         Float    @map("home_prev_avg_fouls")
+  awayPrevAvgFouls         Float    @map("away_prev_avg_fouls")
+  homePrevAvgOffsides      Float    @map("home_prev_avg_offsides")
+  awayPrevAvgOffsides      Float    @map("away_prev_avg_offsides")
+  homePrevAvgXgScored      Float    @map("home_prev_avg_xg_scored")
+  homePrevAvgXgConceded    Float    @map("home_prev_avg_xg_conceded")
+  awayPrevAvgXgScored      Float    @map("away_prev_avg_xg_scored")
+  awayPrevAvgXgConceded    Float    @map("away_prev_avg_xg_conceded")
+  homeScore                Int?     @map("home_score")
+  awayScore                Int?     @map("away_score")
+  resultType               String?  @map("result_type")
+  homeXg                   Float?   @map("home_xg")
+  awayXg                   Float?   @map("away_xg")
+  matchResult              String?  @map("match_result")
+
+  @@map("match_prediction_features")
+}
+
+model MatchEvent {
+  id        Int    @id @map("event_id")
+  matchId   Int    @map("match_id")
+  match     Match  @relation(fields: [matchId], references: [id])
+  minute    String
+  eventType String @map("event_type")
+  teamId    Int    @map("team_id")
+  team      Team   @relation(fields: [teamId], references: [id])
+  playerId  Int    @map("player_id")
+  player    Player @relation(fields: [playerId], references: [id])
+
+  @@index([matchId])
+  @@index([teamId])
+  @@index([playerId])
+  @@map("match_events")
+}
+
+model MatchLineup {
+  id               Int     @id @map("lineup_id")
+  matchId          Int     @map("match_id")
+  match            Match   @relation(fields: [matchId], references: [id])
+  playerId         Int     @map("player_id")
+  player           Player  @relation(fields: [playerId], references: [id])
+  teamId           Int     @map("team_id")
+  team             Team    @relation(fields: [teamId], references: [id])
+  isStartingXi     Boolean @map("is_starting_xi")
+  tacticalPosition String? @map("tactical_position")
+  minutesPlayed    Int     @map("minutes_played")
+
+  @@index([matchId])
+  @@index([playerId])
+  @@index([teamId])
+  @@map("match_lineups")
+}
+
+model MatchTeamStats {
+  matchId           Int      @map("match_id")
+  match             Match    @relation(fields: [matchId], references: [id])
+  teamId            Int      @map("team_id")
+  team              Team     @relation(fields: [teamId], references: [id])
+  possessionPct     Int      @map("possession_pct")
+  totalShots        Int      @map("total_shots")
+  shotsOnTarget     Int      @map("shots_on_target")
+  corners           Int
+  fouls             Int
+  offsides          Int
+  saves             Int
+  playerOfTheMatch  String?  @map("player_of_the_match")
+  dataSource        String   @map("data_source")
+  lastUpdated       DateTime @map("last_updated")
+
+  @@id([matchId, teamId])
+  @@index([matchId])
+  @@index([teamId])
+  @@map("match_team_stats")
 }
