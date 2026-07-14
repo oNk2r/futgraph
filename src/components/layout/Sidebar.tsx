@@ -6,31 +6,11 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
-  Users,
-  User,
-  BarChart3,
-  Bot,
-  Settings,
   ChevronLeft,
   ChevronRight,
   TrendingUp,
 } from "lucide-react";
 
-const GithubIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    width="24"
-    height="24"
-    stroke="currentColor"
-    strokeWidth="2"
-    fill="none"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-  </svg>
-);
 import { useSidebar } from "./SidebarContext";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -48,14 +28,6 @@ export function Sidebar() {
 
   const mainNav: SidebarItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Teams", href: "/dashboard/teams", icon: Users },
-    { name: "Players", href: "/dashboard/players", icon: User },
-    { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-    { name: "AI Insights", href: "/dashboard/ai", icon: Bot, badge: "Beta" },
-  ];
-
-  const bottomNav: SidebarItem[] = [
-    { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
   return (
@@ -102,11 +74,11 @@ export function Sidebar() {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group",
                     isActive
-                      ? "text-white bg-white/5 border border-white/10"
+                      ? "text-white bg-emerald-500/5 border border-emerald-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]"
                       : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
                   )}
                 >
-                  <Icon className={cn("w-4 h-4 shrink-0 transition-colors", isActive ? "text-blue-400" : "text-zinc-400 group-hover:text-white")} />
+                  <Icon className={cn("w-4 h-4 shrink-0 transition-colors", isActive ? "text-emerald-400" : "text-zinc-400 group-hover:text-white")} />
                   {!collapsed && (
                     <motion.div
                       initial={{ opacity: 0, x: -5 }}
@@ -135,51 +107,6 @@ export function Sidebar() {
 
       {/* Bottom Actions & User Profile */}
       <div className="flex flex-col gap-4">
-        {/* Bottom Nav Links */}
-        <div className="flex flex-col gap-1">
-          {bottomNav.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href} className="relative block">
-                <div
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group",
-                    isActive
-                      ? "text-white bg-white/5 border border-white/10"
-                      : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
-                  )}
-                >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  {!collapsed && <span>{item.name}</span>}
-                  {collapsed && (
-                    <div className="absolute left-14 bg-[#111113] border border-[#27272A] text-white text-xs px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50 whitespace-nowrap">
-                      {item.name}
-                    </div>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
-
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative block"
-          >
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent transition-all group">
-              <GithubIcon className="w-4 h-4 shrink-0" />
-              {!collapsed && <span>GitHub</span>}
-              {collapsed && (
-                <div className="absolute left-14 bg-[#111113] border border-[#27272A] text-white text-xs px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50 whitespace-nowrap">
-                  GitHub
-                </div>
-              )}
-            </div>
-          </a>
-        </div>
-
         {/* Divider */}
         <div className="h-px bg-[#27272A] mx-2" />
 
